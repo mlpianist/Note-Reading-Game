@@ -294,7 +294,7 @@
 <!-- ══════════════ HOME SCREEN ══════════════ -->
 <div id="screen-home" class="screen active">
   <h1 class="page-title">Treble Clef Note Reading Game</h1>
-  <p class="page-sub">nbsp;</p>
+
   <div class="card">
     <div class="home-buttons">
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('spaces')">
@@ -343,7 +343,7 @@
   <div class="card">
     <div id="staff-wrap">
       <div id="staff-svg"></div>
-      <div id="note-name-label">—</div>
+
     </div>
 
     <div class="status-row">
@@ -454,7 +454,7 @@ function renderNote(noteObj) {
   voice.addTickables([sn]);
   new VF.Formatter().joinVoices([voice]).format([voice], W - 100);
   voice.draw(ctx, stave);
-  document.getElementById('note-name-label').textContent = noteObj.name;
+
 }
 
 // ═══════════════════════════════════════════════════════════
