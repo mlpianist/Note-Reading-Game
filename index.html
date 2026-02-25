@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Note Reader</title>
+<title>Treble Clef Note Reading Game</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -293,17 +293,17 @@
 
 <!-- ══════════════ HOME SCREEN ══════════════ -->
 <div id="screen-home" class="screen active">
-  <h1 class="page-title">Note <span>Reader</span></h1>
-  <p class="page-sub">Treble Clef Ear Training</p>
+  <h1 class="page-title">Treble Clef Note Reading Game</h1>
+  <p class="page-sub">nbsp;</p>
   <div class="card">
     <div class="home-buttons">
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('spaces')">
         <span class="btn-title">Treble Clef Spaces</span>
-        <span class="btn-desc">F4 · A4 · C5 · E5</span>
+        
       </button>
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('lines')">
         <span class="btn-title">Treble Clef Lines</span>
-        <span class="btn-desc">E4 · G4 · B4 · D5 · F5</span>
+        
       </button>
     </div>
   </div>
@@ -329,7 +329,7 @@
       </div>
       <div class="level-card" onclick="startGame(4)">
         <span class="level-num">4</span>
-        <span class="level-goal">20 correct<br>under 30 sec</span>
+        <span class="level-goal">20 correct<br>under 40 sec</span>
       </div>
     </div>
   </div>
@@ -426,7 +426,7 @@ const LEVELS = [
   { streakGoal: 5,  totalGoal: 0,  timeLimit: 0  }, // Level 1
   { streakGoal: 10, totalGoal: 0,  timeLimit: 0  }, // Level 2
   { streakGoal: 20, totalGoal: 0,  timeLimit: 0  }, // Level 3
-  { streakGoal: 0,  totalGoal: 20, timeLimit: 30 }, // Level 4
+  { streakGoal: 0,  totalGoal: 20, timeLimit: 40 }, // Level 4
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -538,7 +538,7 @@ function goLevelSelect(mode) {
   document.getElementById('level-screen-title').innerHTML =
     'Treble Clef <span style="color:var(--accent)">' + (isSpaces ? 'Spaces' : 'Lines') + '</span>';
   document.getElementById('level-screen-sub').textContent =
-    isSpaces ? 'F4 · A4 · C5 · E5' : 'E4 · G4 · B4 · D5 · F5';
+    '';
   showScreen('screen-levels');
 }
 
@@ -553,7 +553,7 @@ async function startGame(level) {
   document.getElementById('game-level-num').textContent = level;
   const def = LEVELS[level];
   let goalText = '';
-  if (level === 4) goalText = 'Get 20 correct in 30 seconds';
+  if (level === 4) goalText = 'Get 20 correct in 40 seconds';
   else if (level === 1) goalText = 'Get 5 correct in a row';
   else if (level === 2) goalText = 'Get 10 correct in a row';
   else if (level === 3) goalText = 'Get 20 correct in a row';
@@ -712,7 +712,7 @@ function endLevel(won) {
     document.getElementById('win-title').textContent = `Congratulations, you completed Level ${currentLevel}!`;
     const def = LEVELS[currentLevel];
     let detail = '';
-    if (currentLevel === 4) detail = `20 notes correct in ${30 - timerSecsLeft} seconds with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
+    if (currentLevel === 4) detail = `20 notes correct in ${40 - timerSecsLeft} seconds with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
     else detail = `You hit a streak of ${def.streakGoal} with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
     document.getElementById('win-sub').textContent = detail;
     showScreen('screen-win');
