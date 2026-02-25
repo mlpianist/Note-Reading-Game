@@ -43,19 +43,23 @@
     pointer-events: none;
   }
 
-  h1 {
+  /* ── Screens ── */
+  .screen { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; }
+  .screen.active { display: flex; }
+
+  /* ── Header ── */
+  .page-title {
     font-family: 'DM Serif Display', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     letter-spacing: -0.02em;
     color: var(--text);
     margin-bottom: 6px;
     text-align: center;
   }
+  .page-title span { color: var(--accent); }
 
-  h1 span { color: var(--accent); }
-
-  .subtitle {
-    font-size: 0.72rem;
+  .page-sub {
+    font-size: 0.7rem;
     color: var(--muted);
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -63,16 +67,15 @@
     text-align: center;
   }
 
+  /* ── Card ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 32px;
+    padding: 36px;
     width: 100%;
-    max-width: 560px;
     position: relative;
   }
-
   .card::before {
     content: '';
     position: absolute;
@@ -83,30 +86,125 @@
     opacity: 0.7;
   }
 
+  /* ── Buttons ── */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+
+  .btn-primary { background: var(--accent); color: #0e0e12; }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  .btn-gap { margin-top: 12px; }
+
+  /* ── Home screen ── */
+  .home-buttons { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+
+  .mode-btn {
+    padding: 22px 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .mode-btn .btn-title {
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #0e0e12;
+  }
+  .mode-btn .btn-desc {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: rgba(14,14,18,0.6);
+    text-transform: none;
+  }
+
+  /* ── Level select ── */
+  .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+
+  .level-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.1s;
+    text-align: center;
+  }
+  .level-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .level-card:active { transform: scale(0.97); }
+
+  .level-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .level-goal {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  .back-link {
+    margin-top: 20px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  /* ── Game screen ── */
   #staff-wrap {
     background: #f9f9f4;
     border-radius: 12px;
     padding: 12px 0 8px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 130px;
     position: relative;
     transition: background 0.25s;
+    width: 100%;
   }
-
   #staff-wrap.correct { background: #effff2; }
   #staff-wrap.wrong   { background: #fff2f2; }
-
   #staff-svg { display: block; }
-
   #note-name-label {
     font-size: 0.65rem;
     color: #8888aa;
     letter-spacing: 0.1em;
     margin-top: 4px;
-    font-family: 'DM Mono', monospace;
   }
 
   .status-row {
@@ -115,7 +213,6 @@
     gap: 10px;
     margin-bottom: 8px;
   }
-
   .mic-dot {
     width: 9px; height: 9px;
     border-radius: 50%;
@@ -129,283 +226,467 @@
     animation: blink 1.4s infinite;
   }
   .mic-dot.error { background: var(--red); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
-  @keyframes blink {
-    0%,100% { opacity:1; } 50% { opacity:0.35; }
-  }
-
-  #status-text {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    flex: 1;
-  }
-
-  #detected-note {
-    font-size: 0.82rem;
-    color: var(--accent2);
-    min-width: 56px;
-    text-align: right;
-  }
+  #status-text { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; flex: 1; }
+  #detected-note { font-size: 0.82rem; color: var(--accent2); min-width: 56px; text-align: right; }
 
   .conf-bar-wrap {
-    height: 2px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-bottom: 20px;
-    overflow: hidden;
+    height: 2px; background: var(--border);
+    border-radius: 2px; margin-bottom: 18px; overflow: hidden;
   }
   .conf-bar {
-    height: 100%;
-    width: 0%;
+    height: 100%; width: 0%;
     background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 2px;
-    transition: width 0.08s;
+    border-radius: 2px; transition: width 0.08s;
   }
 
   #feedback {
     text-align: center;
     font-family: 'DM Serif Display', serif;
-    font-size: 1.7rem;
-    height: 42px;
-    margin-bottom: 20px;
+    font-size: 1.6rem;
+    height: 40px;
+    margin-bottom: 18px;
     letter-spacing: -0.01em;
     transition: color 0.2s;
   }
   #feedback.correct { color: var(--accent); }
   #feedback.wrong   { color: var(--red); }
 
-  .score-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
+  /* Score / goal row */
+  .score-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
   .score-box {
     flex: 1;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px 10px;
+    padding: 12px 8px;
     text-align: center;
   }
-
-  .score-val {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--text);
-    display: block;
-  }
+  .score-val { font-size: 1.4rem; font-weight: 500; color: var(--text); display: block; }
   .score-val.green { color: var(--accent); }
   .score-val.red   { color: var(--red); }
+  .score-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; display: block; }
 
-  .score-label {
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-top: 2px;
-    display: block;
-  }
+  /* Timer bar (level 4) */
+  #timer-wrap { margin-bottom: 14px; display: none; }
+  #timer-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+  #timer-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  #timer-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 3px; transition: width 0.1s linear; }
+  #timer-bar.urgent { background: linear-gradient(90deg, var(--red), #ff9966); }
 
-  #start-btn {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    background: var(--accent);
-    color: #0e0e12;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 22px;
-    transition: opacity 0.2s, transform 0.1s;
+  /* ── End screens ── */
+  .end-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .end-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    text-align: center;
   }
-  #start-btn:hover { opacity: 0.85; }
-  #start-btn:active { transform: scale(0.98); }
-  #start-btn:disabled { opacity: 0.35; cursor: default; }
+  .end-title.win  { color: var(--accent); }
+  .end-title.lose { color: var(--red); }
+  .end-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 28px; text-align: center; line-height: 1.7; }
 </style>
 </head>
 <body>
 
-<h1>Note <span>Reader</span></h1>
-<p class="subtitle">Play the note shown on the staff — C4 to A5</p>
-
-<div class="card">
-  <div id="staff-wrap">
-    <div id="staff-svg"></div>
-    <div id="note-name-label">press start to begin</div>
-  </div>
-
-  <div class="status-row">
-    <div class="mic-dot" id="mic-dot"></div>
-    <span id="status-text">Press Start to enable microphone</span>
-    <span id="detected-note">—</span>
-  </div>
-  <div class="conf-bar-wrap"><div class="conf-bar" id="conf-bar"></div></div>
-
-  <div id="feedback">&nbsp;</div>
-
-  <div class="score-row">
-    <div class="score-box">
-      <span class="score-val green" id="sc-correct">0</span>
-      <span class="score-label">Correct</span>
-    </div>
-    <div class="score-box">
-      <span class="score-val red" id="sc-wrong">0</span>
-      <span class="score-label">Wrong</span>
-    </div>
-    <div class="score-box">
-      <span class="score-val" id="sc-streak">0</span>
-      <span class="score-label">Streak</span>
+<!-- ══════════════ HOME SCREEN ══════════════ -->
+<div id="screen-home" class="screen active">
+  <h1 class="page-title">Note <span>Reader</span></h1>
+  <p class="page-sub">Treble Clef Ear Training</p>
+  <div class="card">
+    <div class="home-buttons">
+      <button class="btn btn-primary mode-btn" onclick="goLevelSelect('spaces')">
+        <span class="btn-title">Treble Clef Spaces</span>
+        <span class="btn-desc">F4 · A4 · C5 · E5</span>
+      </button>
+      <button class="btn btn-primary mode-btn" onclick="goLevelSelect('lines')">
+        <span class="btn-title">Treble Clef Lines</span>
+        <span class="btn-desc">E4 · G4 · B4 · D5 · F5</span>
+      </button>
     </div>
   </div>
+</div>
 
-  <button id="start-btn">Start Listening</button>
+<!-- ══════════════ LEVEL SELECT SCREEN ══════════════ -->
+<div id="screen-levels" class="screen">
+  <h1 class="page-title" id="level-screen-title">Spaces</h1>
+  <p class="page-sub" id="level-screen-sub">Choose a level</p>
+  <div class="card">
+    <div class="level-grid">
+      <div class="level-card" onclick="startGame(1)">
+        <span class="level-num">1</span>
+        <span class="level-goal">5 correct<br>in a row</span>
+      </div>
+      <div class="level-card" onclick="startGame(2)">
+        <span class="level-num">2</span>
+        <span class="level-goal">10 correct<br>in a row</span>
+      </div>
+      <div class="level-card" onclick="startGame(3)">
+        <span class="level-num">3</span>
+        <span class="level-goal">20 correct<br>in a row</span>
+      </div>
+      <div class="level-card" onclick="startGame(4)">
+        <span class="level-num">4</span>
+        <span class="level-goal">20 correct<br>under 30 sec</span>
+      </div>
+    </div>
+  </div>
+  <button class="back-link" onclick="goHome()">← Back</button>
+</div>
+
+<!-- ══════════════ GAME SCREEN ══════════════ -->
+<div id="screen-game" class="screen">
+  <h1 class="page-title" id="game-title">Level <span id="game-level-num">1</span></h1>
+  <p class="page-sub" id="game-goal-sub"></p>
+  <div class="card">
+    <div id="staff-wrap">
+      <div id="staff-svg"></div>
+      <div id="note-name-label">—</div>
+    </div>
+
+    <div class="status-row">
+      <div class="mic-dot" id="mic-dot"></div>
+      <span id="status-text">Starting…</span>
+      <span id="detected-note">—</span>
+    </div>
+    <div class="conf-bar-wrap"><div class="conf-bar" id="conf-bar"></div></div>
+
+    <div id="feedback">&nbsp;</div>
+
+    <div id="timer-wrap">
+      <div id="timer-label">Time remaining — <span id="timer-secs">30</span>s</div>
+      <div id="timer-bar-bg"><div id="timer-bar"></div></div>
+    </div>
+
+    <div class="score-row">
+      <div class="score-box">
+        <span class="score-val green" id="sc-correct">0</span>
+        <span class="score-label" id="sc-correct-label">Correct</span>
+      </div>
+      <div class="score-box">
+        <span class="score-val" id="sc-streak">0</span>
+        <span class="score-label" id="sc-streak-label">Streak</span>
+      </div>
+      <div class="score-box">
+        <span class="score-val red" id="sc-wrong">0</span>
+        <span class="score-label">Wrong</span>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="quitGame()">Quit Level</button>
+  </div>
+</div>
+
+<!-- ══════════════ WIN SCREEN ══════════════ -->
+<div id="screen-win" class="screen">
+  <div class="card" style="text-align:center">
+    <div class="end-icon">🎉</div>
+    <div class="end-title win" id="win-title">Congratulations!</div>
+    <div class="end-sub" id="win-sub"></div>
+    <button class="btn btn-primary" onclick="goLevelSelect(currentMode)">Play Another Level</button>
+    <button class="btn btn-secondary btn-gap" onclick="goHome()">Home</button>
+  </div>
+</div>
+
+<!-- ══════════════ LOSE SCREEN ══════════════ -->
+<div id="screen-lose" class="screen">
+  <div class="card" style="text-align:center">
+    <div class="end-icon">😔</div>
+    <div class="end-title lose">Not quite!</div>
+    <div class="end-sub" id="lose-sub"></div>
+    <button class="btn btn-primary" onclick="retryGame()">Try Again</button>
+    <button class="btn btn-secondary btn-gap" onclick="goLevelSelect(currentMode)">Choose Level</button>
+    <button class="btn btn-secondary btn-gap" onclick="goHome()">Home</button>
+  </div>
 </div>
 
 <script>
-// ─── Note pool: C4 to A5 with sharps and flats ────────────────────────────────
-const NOTE_POOL = [
-  { vex:'c/4',  name:'C4',   midi:60, acc:null  },
-  { vex:'c#/4', name:'C♯4',  midi:61, acc:'#'   },
-  { vex:'db/4', name:'D♭4',  midi:61, acc:'b'   },
-  { vex:'d/4',  name:'D4',   midi:62, acc:null  },
-  { vex:'d#/4', name:'D♯4',  midi:63, acc:'#'   },
-  { vex:'eb/4', name:'E♭4',  midi:63, acc:'b'   },
-  { vex:'e/4',  name:'E4',   midi:64, acc:null  },
-  { vex:'f/4',  name:'F4',   midi:65, acc:null  },
-  { vex:'f#/4', name:'F♯4',  midi:66, acc:'#'   },
-  { vex:'gb/4', name:'G♭4',  midi:66, acc:'b'   },
-  { vex:'g/4',  name:'G4',   midi:67, acc:null  },
-  { vex:'g#/4', name:'G♯4',  midi:68, acc:'#'   },
-  { vex:'ab/4', name:'A♭4',  midi:68, acc:'b'   },
-  { vex:'a/4',  name:'A4',   midi:69, acc:null  },
-  { vex:'a#/4', name:'A♯4',  midi:70, acc:'#'   },
-  { vex:'bb/4', name:'B♭4',  midi:70, acc:'b'   },
-  { vex:'b/4',  name:'B4',   midi:71, acc:null  },
-  { vex:'c/5',  name:'C5',   midi:72, acc:null  },
-  { vex:'c#/5', name:'C♯5',  midi:73, acc:'#'   },
-  { vex:'db/5', name:'D♭5',  midi:73, acc:'b'   },
-  { vex:'d/5',  name:'D5',   midi:74, acc:null  },
-  { vex:'d#/5', name:'D♯5',  midi:75, acc:'#'   },
-  { vex:'eb/5', name:'E♭5',  midi:75, acc:'b'   },
-  { vex:'e/5',  name:'E5',   midi:76, acc:null  },
-  { vex:'f/5',  name:'F5',   midi:77, acc:null  },
-  { vex:'f#/5', name:'F♯5',  midi:78, acc:'#'   },
-  { vex:'gb/5', name:'G♭5',  midi:78, acc:'b'   },
-  { vex:'g/5',  name:'G5',   midi:79, acc:null  },
-  { vex:'g#/5', name:'G♯5',  midi:80, acc:'#'   },
-  { vex:'ab/5', name:'A♭5',  midi:80, acc:'b'   },
-  { vex:'a/5',  name:'A5',   midi:81, acc:null  },
+// ═══════════════════════════════════════════════════════════
+// NOTE POOLS
+// ═══════════════════════════════════════════════════════════
+const SPACES_NOTES = [
+  { vex:'f/4', name:'F4', midi:65, acc:null },
+  { vex:'a/4', name:'A4', midi:69, acc:null },
+  { vex:'c/5', name:'C5', midi:72, acc:null },
+  { vex:'e/5', name:'E5', midi:76, acc:null },
+];
+const LINES_NOTES = [
+  { vex:'e/4', name:'E4', midi:64, acc:null },
+  { vex:'g/4', name:'G4', midi:67, acc:null },
+  { vex:'b/4', name:'B4', midi:71, acc:null },
+  { vex:'d/5', name:'D5', midi:74, acc:null },
+  { vex:'f/5', name:'F5', midi:77, acc:null },
 ];
 
-// ─── VexFlow rendering ────────────────────────────────────────────────────────
-const VF = (typeof Vex !== "undefined" && Vex.Flow) ? Vex.Flow : (typeof VexFlow !== "undefined" ? VexFlow : null);
+// Level definitions: { streakGoal, totalGoal, timeLimit (seconds, 0=none) }
+const LEVELS = [
+  null, // index 0 unused
+  { streakGoal: 5,  totalGoal: 0,  timeLimit: 0  }, // Level 1
+  { streakGoal: 10, totalGoal: 0,  timeLimit: 0  }, // Level 2
+  { streakGoal: 20, totalGoal: 0,  timeLimit: 0  }, // Level 3
+  { streakGoal: 0,  totalGoal: 20, timeLimit: 30 }, // Level 4
+];
 
-let currentNote = null;
-
-function pickNote() {
-  let n;
-  let tries = 0;
-  do {
-    n = NOTE_POOL[Math.floor(Math.random() * NOTE_POOL.length)];
-    tries++;
-  } while (currentNote && n.midi === currentNote.midi && tries < 20);
-  return n;
-}
+// ═══════════════════════════════════════════════════════════
+// VexFlow
+// ═══════════════════════════════════════════════════════════
+const VF = (typeof Vex !== "undefined" && Vex.Flow)
+  ? Vex.Flow
+  : (typeof VexFlow !== "undefined" ? VexFlow : null);
 
 function renderNote(noteObj) {
   const container = document.getElementById('staff-svg');
   container.innerHTML = '';
-
-  const W = 400, H = 110;
+  const W = 400, H = 115;
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
   renderer.resize(W, H);
   const ctx = renderer.getContext();
-
-  const stave = new VF.Stave(10, 8, W - 20);
+  const stave = new VF.Stave(10, 10, W - 20);
   stave.addClef('treble');
   stave.setContext(ctx).draw();
-
-  const sn = new VF.StaveNote({
-    clef: 'treble',
-    keys: [noteObj.vex],
-    duration: 'q',
-  });
-
-  if (noteObj.acc === '#') sn.addAccidental(0, new VF.Accidental("#"));
+  const sn = new VF.StaveNote({ clef:'treble', keys:[noteObj.vex], duration:'q' });
+  if (noteObj.acc === '#') sn.addAccidental(0, new VF.Accidental('#'));
   else if (noteObj.acc === 'b') sn.addAccidental(0, new VF.Accidental('b'));
-
-  const voice = new VF.Voice({ num_beats: 1, beat_value: 4 });
+  const voice = new VF.Voice({ num_beats:1, beat_value:4 });
   voice.setStrict(false);
   voice.addTickables([sn]);
   new VF.Formatter().joinVoices([voice]).format([voice], W - 100);
   voice.draw(ctx, stave);
-
   document.getElementById('note-name-label').textContent = noteObj.name;
 }
 
-// ─── Pitch detection (autocorrelation) ───────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// Pitch detection
+// ═══════════════════════════════════════════════════════════
 function autoCorrelate(buffer, sampleRate) {
   const SIZE = buffer.length;
   let rms = 0;
   for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
   rms = Math.sqrt(rms / SIZE);
   if (rms < 0.008) return -1;
-
   let r1 = 0, r2 = SIZE - 1;
   const thresh = 0.2;
-  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buffer[i]) < thresh) { r1 = i; break; } }
-  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buffer[SIZE - i]) < thresh) { r2 = SIZE - i; break; } }
-
+  for (let i = 0; i < SIZE/2; i++) { if (Math.abs(buffer[i]) < thresh) { r1 = i; break; } }
+  for (let i = 1; i < SIZE/2; i++) { if (Math.abs(buffer[SIZE-i]) < thresh) { r2 = SIZE-i; break; } }
   const buf2 = buffer.slice(r1, r2);
   const c = new Float32Array(buf2.length).fill(0);
   for (let i = 0; i < buf2.length; i++)
     for (let j = 0; j < buf2.length - i; j++)
-      c[i] += buf2[j] * buf2[j + i];
-
+      c[i] += buf2[j] * buf2[j+i];
   let d = 0;
-  while (d < c.length && c[d] > c[d + 1]) d++;
-
+  while (d < c.length && c[d] > c[d+1]) d++;
   let maxVal = -1, maxPos = -1;
-  for (let i = d; i < c.length; i++) {
-    if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; }
-  }
+  for (let i = d; i < c.length; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
   if (maxPos < 1) return -1;
-
   let T0 = maxPos;
-  const x1 = c[T0 - 1], x2 = c[T0], x3 = T0 + 1 < c.length ? c[T0 + 1] : c[T0];
-  const a = (x1 + x3 - 2 * x2) / 2;
+  const x1 = c[T0-1], x2 = c[T0], x3 = T0+1 < c.length ? c[T0+1] : c[T0];
+  const a = (x1 + x3 - 2*x2) / 2;
   const b2 = (x3 - x1) / 2;
-  if (a) T0 -= b2 / (2 * a);
+  if (a) T0 -= b2 / (2*a);
   return sampleRate / T0;
 }
-
-function freqToMidi(freq) {
-  return Math.round(12 * Math.log2(freq / 440) + 69);
-}
-
+function freqToMidi(freq) { return Math.round(12 * Math.log2(freq / 440) + 69); }
 function midiToName(midi) {
   const names = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
   return names[midi % 12] + (Math.floor(midi / 12) - 1);
 }
 
-// ─── Game state ───────────────────────────────────────────────────────────────
-let correct = 0, wrong = 0, streak = 0;
+// ═══════════════════════════════════════════════════════════
+// App state
+// ═══════════════════════════════════════════════════════════
+let currentMode = 'spaces';   // 'spaces' | 'lines'
+let currentLevel = 1;
+let notePool = [];
+let currentNote = null;
+
+// Game counters
+let correctCount = 0;
+let wrongCount = 0;
+let streakCount = 0;
+
+// Audio
 let listening = false;
 let audioCtx = null, analyser = null, micStream = null, rafId = null;
 let cooldown = false, lastMidi = -1, stableCount = 0;
 const STABLE_NEEDED = 10;
 
-function updateScores() {
-  document.getElementById('sc-correct').textContent = correct;
-  document.getElementById('sc-wrong').textContent = wrong;
-  document.getElementById('sc-streak').textContent = streak;
+// Timer (level 4)
+let timerInterval = null;
+let timerSecsLeft = 30;
+
+// ═══════════════════════════════════════════════════════════
+// Screen navigation
+// ═══════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  stopAudio();
+  stopTimer();
+  showScreen('screen-home');
+}
+
+function goLevelSelect(mode) {
+  stopAudio();
+  stopTimer();
+  currentMode = mode;
+  const isSpaces = mode === 'spaces';
+  document.getElementById('level-screen-title').innerHTML =
+    'Treble Clef <span style="color:var(--accent)">' + (isSpaces ? 'Spaces' : 'Lines') + '</span>';
+  document.getElementById('level-screen-sub').textContent =
+    isSpaces ? 'F4 · A4 · C5 · E5' : 'E4 · G4 · B4 · D5 · F5';
+  showScreen('screen-levels');
+}
+
+async function startGame(level) {
+  currentLevel = level;
+  notePool = currentMode === 'spaces' ? SPACES_NOTES : LINES_NOTES;
+  correctCount = 0; wrongCount = 0; streakCount = 0;
+  currentNote = null;
+  cooldown = false; lastMidi = -1; stableCount = 0;
+
+  // Update game screen labels
+  document.getElementById('game-level-num').textContent = level;
+  const def = LEVELS[level];
+  let goalText = '';
+  if (level === 4) goalText = 'Get 20 correct in 30 seconds';
+  else if (level === 1) goalText = 'Get 5 correct in a row';
+  else if (level === 2) goalText = 'Get 10 correct in a row';
+  else if (level === 3) goalText = 'Get 20 correct in a row';
+  document.getElementById('game-goal-sub').textContent = goalText;
+
+  // Streak label changes based on mode
+  if (def.streakGoal > 0) {
+    document.getElementById('sc-streak-label').textContent = `Streak / ${def.streakGoal}`;
+  } else {
+    document.getElementById('sc-streak-label').textContent = 'Streak';
+    document.getElementById('sc-correct-label').textContent = `Correct / ${def.totalGoal}`;
+  }
+
+  updateScoreDisplay();
+  document.getElementById('feedback').innerHTML = '&nbsp;';
+  document.getElementById('feedback').className = '';
+
+  // Timer bar
+  const timerWrap = document.getElementById('timer-wrap');
+  if (def.timeLimit > 0) {
+    timerWrap.style.display = 'block';
+    timerSecsLeft = def.timeLimit;
+    document.getElementById('timer-secs').textContent = timerSecsLeft;
+    document.getElementById('timer-bar').style.width = '100%';
+    document.getElementById('timer-bar').classList.remove('urgent');
+  } else {
+    timerWrap.style.display = 'none';
+  }
+
+  showScreen('screen-game');
+
+  // Start mic
+  await initAudio();
+  if (!listening) return; // mic failed — stay on screen but don't proceed
+
+  pickAndShowNote();
+  audioLoop();
+
+  // Start countdown for level 4
+  if (def.timeLimit > 0) {
+    startTimer(def.timeLimit);
+  }
+}
+
+function retryGame() { startGame(currentLevel); }
+
+function quitGame() {
+  stopAudio();
+  stopTimer();
+  goLevelSelect(currentMode);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Audio init / teardown
+// ═══════════════════════════════════════════════════════════
+async function initAudio() {
+  stopAudio();
+  document.getElementById('mic-dot').className = 'mic-dot';
+  document.getElementById('status-text').textContent = 'Requesting microphone…';
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+  } catch(e) {
+    document.getElementById('status-text').textContent = 'Mic access denied — please allow microphone.';
+    document.getElementById('mic-dot').className = 'mic-dot error';
+    return;
+  }
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 4096;
+  analyser.smoothingTimeConstant = 0.6;
+  audioCtx.createMediaStreamSource(micStream).connect(analyser);
+  listening = true;
+  document.getElementById('mic-dot').className = 'mic-dot active';
+  document.getElementById('status-text').textContent = 'Listening — play the note shown';
+}
+
+function stopAudio() {
+  listening = false;
+  cancelAnimationFrame(rafId);
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioCtx)  { audioCtx.close(); audioCtx = null; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Timer (level 4)
+// ═══════════════════════════════════════════════════════════
+function startTimer(secs) {
+  stopTimer();
+  timerSecsLeft = secs;
+  const bar = document.getElementById('timer-bar');
+  const label = document.getElementById('timer-secs');
+  const total = secs;
+
+  timerInterval = setInterval(() => {
+    timerSecsLeft--;
+    label.textContent = timerSecsLeft;
+    bar.style.width = ((timerSecsLeft / total) * 100) + '%';
+    if (timerSecsLeft <= 10) bar.classList.add('urgent');
+    if (timerSecsLeft <= 0) {
+      stopTimer();
+      endLevel(false);
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Game logic
+// ═══════════════════════════════════════════════════════════
+function pickAndShowNote() {
+  let n, tries = 0;
+  do {
+    n = notePool[Math.floor(Math.random() * notePool.length)];
+    tries++;
+  } while (currentNote && n.midi === currentNote.midi && tries < 20);
+  currentNote = n;
+  renderNote(currentNote);
+  document.getElementById('feedback').innerHTML = '&nbsp;';
+  document.getElementById('feedback').className = '';
+  lastMidi = -1; stableCount = 0; cooldown = false;
+}
+
+function updateScoreDisplay() {
+  document.getElementById('sc-correct').textContent = correctCount;
+  document.getElementById('sc-streak').textContent = streakCount;
+  document.getElementById('sc-wrong').textContent = wrongCount;
 }
 
 function flash(text, cls) {
@@ -417,17 +698,37 @@ function flash(text, cls) {
   setTimeout(() => wrap.classList.remove(cls), 450);
 }
 
-function nextNote() {
-  currentNote = pickNote();
-  renderNote(currentNote);
-  document.getElementById('feedback').innerHTML = '&nbsp;';
-  document.getElementById('feedback').className = '';
-  lastMidi = -1;
-  stableCount = 0;
-  cooldown = false;
+function checkWinCondition() {
+  const def = LEVELS[currentLevel];
+  if (def.streakGoal > 0 && streakCount >= def.streakGoal) return true;
+  if (def.totalGoal > 0 && correctCount >= def.totalGoal) return true;
+  return false;
 }
 
-// ─── Audio loop ───────────────────────────────────────────────────────────────
+function endLevel(won) {
+  stopAudio();
+  stopTimer();
+  if (won) {
+    document.getElementById('win-title').textContent = `Congratulations, you completed Level ${currentLevel}!`;
+    const def = LEVELS[currentLevel];
+    let detail = '';
+    if (currentLevel === 4) detail = `20 notes correct in ${30 - timerSecsLeft} seconds with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
+    else detail = `You hit a streak of ${def.streakGoal} with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
+    document.getElementById('win-sub').textContent = detail;
+    showScreen('screen-win');
+  } else {
+    const def = LEVELS[currentLevel];
+    let detail = '';
+    if (currentLevel === 4) detail = `You got ${correctCount} / 20 correct before time ran out.`;
+    else detail = `Your best streak was ${streakCount}. Goal: ${def.streakGoal} in a row.`;
+    document.getElementById('lose-sub').textContent = detail;
+    showScreen('screen-lose');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Audio loop
+// ═══════════════════════════════════════════════════════════
 function audioLoop() {
   if (!listening) return;
   rafId = requestAnimationFrame(audioLoop);
@@ -453,7 +754,6 @@ function audioLoop() {
   confBar.style.width = (conf * 100).toFixed(0) + '%';
 
   if (conf < 0.35) { lastMidi = -1; stableCount = 0; return; }
-
   if (midi === lastMidi) stableCount++;
   else { lastMidi = midi; stableCount = 1; }
 
@@ -462,73 +762,27 @@ function audioLoop() {
     stableCount = 0;
 
     if (midi === currentNote.midi) {
-      correct++; streak++;
+      correctCount++; streakCount++;
+      updateScoreDisplay();
       flash('✓ Correct!', 'correct');
-      setTimeout(nextNote, 700);
+
+      if (checkWinCondition()) {
+        setTimeout(() => endLevel(true), 600);
+      } else {
+        setTimeout(pickAndShowNote, 700);
+      }
     } else {
-      wrong++; streak = 0;
+      wrongCount++;
+      const def = LEVELS[currentLevel];
+      // For streak-based levels, a wrong answer resets streak
+      if (def.streakGoal > 0) streakCount = 0;
+      updateScoreDisplay();
       const got = midiToName(midi);
       flash(`✗ That was ${got}`, 'wrong');
       setTimeout(() => { cooldown = false; }, 1100);
     }
-    updateScores();
   }
 }
-
-// ─── Start / Stop ─────────────────────────────────────────────────────────────
-document.getElementById('start-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('start-btn');
-
-  if (listening) {
-    listening = false;
-    cancelAnimationFrame(rafId);
-    if (micStream) micStream.getTracks().forEach(t => t.stop());
-    if (audioCtx) { audioCtx.close(); audioCtx = null; }
-    btn.textContent = 'Start Listening';
-    document.getElementById('mic-dot').className = 'mic-dot';
-    document.getElementById('status-text').textContent = 'Stopped. Press Start to try again.';
-    return;
-  }
-
-  btn.disabled = true;
-  document.getElementById('status-text').textContent = 'Requesting microphone…';
-
-  try {
-    micStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-    });
-  } catch (e) {
-    document.getElementById('status-text').textContent = 'Mic access denied — please allow microphone access.';
-    document.getElementById('mic-dot').className = 'mic-dot error';
-    btn.disabled = false;
-    return;
-  }
-
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 4096;
-  analyser.smoothingTimeConstant = 0.6;
-  audioCtx.createMediaStreamSource(micStream).connect(analyser);
-
-  listening = true;
-  btn.disabled = false;
-  btn.textContent = 'Stop';
-
-  document.getElementById('mic-dot').className = 'mic-dot active';
-  document.getElementById('status-text').textContent = 'Listening — play the note shown';
-
-  correct = 0; wrong = 0; streak = 0; updateScores();
-
-  nextNote();
-  audioLoop();
-});
-
-// ─── Show a placeholder note on load ─────────────────────────────────────────
-(function() {
-  const placeholder = { vex:'c/4', name:'C4', midi:60, acc:null };
-  renderNote(placeholder);
-  document.getElementById('note-name-label').textContent = 'press start to begin';
-})();
 </script>
 </body>
 </html>
