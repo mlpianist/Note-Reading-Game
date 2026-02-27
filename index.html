@@ -6,6 +6,16 @@
 <title>Treble Clef Note Reading Game</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- Import map so bare specifier "pitchy" resolves from jsDelivr ESM -->
+<script type="importmap">
+{
+  "imports": {
+    "pitchy": "https://cdn.jsdelivr.net/npm/pitchy@4.1.0/+esm"
+  }
+}
+</script>
+
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -43,11 +53,9 @@
     pointer-events: none;
   }
 
-  /* ── Screens ── */
   .screen { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; }
   .screen.active { display: flex; }
 
-  /* ── Header ── */
   .page-title {
     font-family: 'DM Serif Display', serif;
     font-size: clamp(2rem, 5vw, 3rem);
@@ -67,7 +75,6 @@
     text-align: center;
   }
 
-  /* ── Card ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -86,7 +93,6 @@
     opacity: 0.7;
   }
 
-  /* ── Buttons ── */
   .btn {
     display: block;
     width: 100%;
@@ -112,10 +118,8 @@
     border: 1px solid var(--border);
   }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
-
   .btn-gap { margin-top: 12px; }
 
-  /* ── Home screen ── */
   .home-buttons { display: flex; flex-direction: column; gap: 14px; width: 100%; }
 
   .mode-btn {
@@ -138,7 +142,6 @@
     text-transform: none;
   }
 
-  /* ── Level select ── */
   .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
 
   .level-card {
@@ -183,7 +186,6 @@
   }
   .back-link:hover { color: var(--accent); }
 
-  /* ── Game screen ── */
   #staff-wrap {
     background: #f9f9f4;
     border-radius: 12px;
@@ -201,12 +203,6 @@
   #staff-wrap.correct { background: #effff2; }
   #staff-wrap.wrong   { background: #fff2f2; }
   #staff-svg { display: block; }
-  #note-name-label {
-    font-size: 0.65rem;
-    color: #8888aa;
-    letter-spacing: 0.1em;
-    margin-top: 4px;
-  }
 
   .status-row {
     display: flex;
@@ -254,7 +250,6 @@
   #feedback.correct { color: var(--accent); }
   #feedback.wrong   { color: var(--red); }
 
-  /* Score / goal row */
   .score-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
   .score-box {
     flex: 1;
@@ -269,14 +264,12 @@
   .score-val.red   { color: var(--red); }
   .score-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; display: block; }
 
-  /* Timer bar (level 4) */
   #timer-wrap { margin-bottom: 14px; display: none; }
   #timer-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
   #timer-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
   #timer-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 3px; transition: width 0.1s linear; }
   #timer-bar.urgent { background: linear-gradient(90deg, var(--red), #ff9966); }
 
-  /* ── End screens ── */
   .end-icon { font-size: 3.5rem; margin-bottom: 12px; }
   .end-title {
     font-family: 'DM Serif Display', serif;
@@ -292,25 +285,22 @@
 </head>
 <body>
 
-<!-- ══════════════ HOME SCREEN ══════════════ -->
+<!-- HOME SCREEN -->
 <div id="screen-home" class="screen active">
   <h1 class="page-title">Treble Clef Note Reading Game</h1>
-
   <div class="card">
     <div class="home-buttons">
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('spaces')">
         <span class="btn-title">Treble Clef Spaces</span>
-        
       </button>
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('lines')">
         <span class="btn-title">Treble Clef Lines</span>
-        
       </button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════ LEVEL SELECT SCREEN ══════════════ -->
+<!-- LEVEL SELECT SCREEN -->
 <div id="screen-levels" class="screen">
   <h1 class="page-title" id="level-screen-title">Spaces</h1>
   <p class="page-sub" id="level-screen-sub">Choose a level</p>
@@ -337,27 +327,26 @@
   <button class="back-link" onclick="goHome()">← Back</button>
 </div>
 
-<!-- ══════════════ GAME SCREEN ══════════════ -->
+<!-- GAME SCREEN -->
 <div id="screen-game" class="screen">
   <h1 class="page-title" id="game-title">Level <span id="game-level-num">1</span></h1>
   <p class="page-sub" id="game-goal-sub"></p>
   <div class="card">
     <div id="staff-wrap">
       <div id="staff-svg"></div>
-
     </div>
 
     <div class="status-row">
       <div class="mic-dot" id="mic-dot"></div>
       <span id="status-text">Starting…</span>
-      <span id="detected-note">—</span>
+
     </div>
     <div class="conf-bar-wrap"><div class="conf-bar" id="conf-bar"></div></div>
 
     <div id="feedback">&nbsp;</div>
 
     <div id="timer-wrap">
-      <div id="timer-label">Time remaining — <span id="timer-secs">30</span>s</div>
+      <div id="timer-label">Time remaining — <span id="timer-secs">40</span>s</div>
       <div id="timer-bar-bg"><div id="timer-bar"></div></div>
     </div>
 
@@ -380,18 +369,18 @@
   </div>
 </div>
 
-<!-- ══════════════ WIN SCREEN ══════════════ -->
+<!-- WIN SCREEN -->
 <div id="screen-win" class="screen">
   <div class="card" style="text-align:center">
     <div class="end-icon">🎉</div>
     <div class="end-title win" id="win-title">Congratulations!</div>
     <div class="end-sub" id="win-sub"></div>
-    <button class="btn btn-primary" onclick="goLevelSelect(currentMode)">Play Another Level</button>
+    <button class="btn btn-primary" onclick="playAnotherLevel()">Play Another Level</button>
     <button class="btn btn-secondary btn-gap" onclick="goHome()">Home</button>
   </div>
 </div>
 
-<!-- ══════════════ LOSE SCREEN ══════════════ -->
+<!-- LOSE SCREEN -->
 <div id="screen-lose" class="screen">
   <div class="card" style="text-align:center">
     <div class="end-icon">😔</div>
@@ -403,10 +392,13 @@
   </div>
 </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════
+<!-- All game logic as an ES module so we can import Pitchy -->
+<script type="module">
+import { PitchDetector } from 'pitchy';
+
+// ═══════════════════════════════════════════════════════
 // NOTE POOLS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const SPACES_NOTES = [
   { vex:'f/4', name:'F4', midi:65, acc:null },
   { vex:'a/4', name:'A4', midi:69, acc:null },
@@ -421,36 +413,32 @@ const LINES_NOTES = [
   { vex:'f/5', name:'F5', midi:77, acc:null },
 ];
 
-// Level definitions: { streakGoal, totalGoal, timeLimit (seconds, 0=none) }
 const LEVELS = [
-  null, // index 0 unused
-  { streakGoal: 5,  totalGoal: 0,  timeLimit: 0  }, // Level 1
-  { streakGoal: 10, totalGoal: 0,  timeLimit: 0  }, // Level 2
-  { streakGoal: 20, totalGoal: 0,  timeLimit: 0  }, // Level 3
-  { streakGoal: 0,  totalGoal: 20, timeLimit: 40 }, // Level 4
+  null,
+  { streakGoal: 5,  totalGoal: 0,  timeLimit: 0  },
+  { streakGoal: 10, totalGoal: 0,  timeLimit: 0  },
+  { streakGoal: 20, totalGoal: 0,  timeLimit: 0  },
+  { streakGoal: 0,  totalGoal: 20, timeLimit: 40 },
 ];
 
-// ═══════════════════════════════════════════════════════════
-// VexFlow
-// ═══════════════════════════════════════════════════════════
-const VF = (typeof Vex !== "undefined" && Vex.Flow)
+// ═══════════════════════════════════════════════════════
+// VexFlow helpers
+// ═══════════════════════════════════════════════════════
+const VF = (typeof Vex !== 'undefined' && Vex.Flow)
   ? Vex.Flow
-  : (typeof VexFlow !== "undefined" ? VexFlow : null);
+  : (typeof VexFlow !== 'undefined' ? VexFlow : null);
 
 function renderNote(noteObj) {
   const container = document.getElementById('staff-svg');
   container.innerHTML = '';
-  // Measure the available width of the staff wrapper, capped at 400px
   const wrap = document.getElementById('staff-wrap');
   const W = Math.min(400, wrap.clientWidth - 16);
-  // Use a fixed height that always fits the stave regardless of width
   const H = 140;
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
   renderer.resize(W, H);
   const ctx = renderer.getContext();
   const scale = W / 400;
   const staveX = Math.round(10 * scale);
-  // Fixed staveY so there's always room for ledger lines below
   const staveY = 20;
   const staveW = W - staveX * 2;
   const stave = new VF.Stave(staveX, staveY, staveW);
@@ -466,111 +454,96 @@ function renderNote(noteObj) {
   voice.draw(ctx, stave);
 }
 
-// ═══════════════════════════════════════════════════════════
-// Pitch detection
-// ═══════════════════════════════════════════════════════════
-function autoCorrelate(buffer, sampleRate) {
-  const SIZE = buffer.length;
-  let rms = 0;
-  for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.003) return -1;
-  let r1 = 0, r2 = SIZE - 1;
-  const thresh = 0.2;
-  for (let i = 0; i < SIZE/2; i++) { if (Math.abs(buffer[i]) < thresh) { r1 = i; break; } }
-  for (let i = 1; i < SIZE/2; i++) { if (Math.abs(buffer[SIZE-i]) < thresh) { r2 = SIZE-i; break; } }
-  const buf2 = buffer.slice(r1, r2);
-  const c = new Float32Array(buf2.length).fill(0);
-  for (let i = 0; i < buf2.length; i++)
-    for (let j = 0; j < buf2.length - i; j++)
-      c[i] += buf2[j] * buf2[j+i];
-  let d = 0;
-  while (d < c.length && c[d] > c[d+1]) d++;
-  let maxVal = -1, maxPos = -1;
-  for (let i = d; i < c.length; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
-  if (maxPos < 1) return -1;
-  let T0 = maxPos;
-  const x1 = c[T0-1], x2 = c[T0], x3 = T0+1 < c.length ? c[T0+1] : c[T0];
-  const a = (x1 + x3 - 2*x2) / 2;
-  const b2 = (x3 - x1) / 2;
-  if (a) T0 -= b2 / (2*a);
-  return sampleRate / T0;
+// ═══════════════════════════════════════════════════════
+// Pitch helpers
+// ═══════════════════════════════════════════════════════
+function freqToMidi(freq) {
+  return Math.round(12 * Math.log2(freq / 440) + 69);
 }
-function freqToMidi(freq) { return Math.round(12 * Math.log2(freq / 440) + 69); }
 function midiToName(midi) {
   const names = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
   return names[midi % 12] + (Math.floor(midi / 12) - 1);
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // App state
-// ═══════════════════════════════════════════════════════════
-let currentMode = 'spaces';   // 'spaces' | 'lines'
+// ═══════════════════════════════════════════════════════
+let currentMode  = 'spaces';
 let currentLevel = 1;
-let notePool = [];
-let currentNote = null;
+let notePool     = [];
+let currentNote  = null;
 
-// Game counters
 let correctCount = 0;
-let wrongCount = 0;
-let streakCount = 0;
+let wrongCount   = 0;
+let streakCount  = 0;
 
 // Audio
-let listening = false;
-let audioCtx = null, analyser = null, micStream = null, rafId = null;
-let cooldown = false, lastMidi = -1, stableCount = 0;
-const STABLE_NEEDED = 5;
+let listening   = false;
+let audioCtx    = null;
+let analyser    = null;
+let micStream   = null;
+let rafId       = null;
+let detector    = null;   // Pitchy PitchDetector instance
+let inputBuf    = null;   // Float32Array sized to detector.inputLength
 
-// Timer (level 4)
-let timerInterval = null;
-let timerSecsLeft = 30;
+// Stability gate — same as before
+let cooldown    = false;
+let lastMidi    = -1;
+let stableCount = 0;
+const STABLE_NEEDED = 6;  // slightly higher threshold for MPM's speed
 
-// ═══════════════════════════════════════════════════════════
-// Screen navigation
-// ═══════════════════════════════════════════════════════════
+// Clarity threshold — MPM's "clarity" replaces the old cents-based confidence.
+// Piano tones: 0.85+ is very reliable; lower catches quieter or softer attacks.
+const CLARITY_THRESHOLD = 0.82;
+
+// Timer
+let timerInterval  = null;
+let timerSecsLeft  = 40;
+
+// ═══════════════════════════════════════════════════════
+// Screen navigation — exposed on window for inline onclick
+// ═══════════════════════════════════════════════════════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function goHome() {
+window.goHome = function() {
   stopAudio();
   stopTimer();
   showScreen('screen-home');
-}
+};
 
-function goLevelSelect(mode) {
+window.goLevelSelect = function(mode) {
   stopAudio();
   stopTimer();
   currentMode = mode;
   const isSpaces = mode === 'spaces';
   document.getElementById('level-screen-title').innerHTML =
     'Treble Clef <span style="color:var(--accent)">' + (isSpaces ? 'Spaces' : 'Lines') + '</span>';
-  document.getElementById('level-screen-sub').textContent =
-    '';
   showScreen('screen-levels');
-}
+};
 
-async function startGame(level) {
+window.startGame = async function(level) {
   currentLevel = level;
   notePool = currentMode === 'spaces' ? SPACES_NOTES : LINES_NOTES;
   correctCount = 0; wrongCount = 0; streakCount = 0;
-  currentNote = null;
-  cooldown = false; lastMidi = -1; stableCount = 0;
+  currentNote  = null;
+  cooldown     = false; lastMidi = -1; stableCount = 0;
 
-  // Update game screen labels
   document.getElementById('game-level-num').textContent = level;
   const def = LEVELS[level];
-  let goalText = '';
-  if (level === 4) goalText = 'Get 20 correct in 40 seconds';
-  else if (level === 1) goalText = 'Get 5 correct in a row';
-  else if (level === 2) goalText = 'Get 10 correct in a row';
-  else if (level === 3) goalText = 'Get 20 correct in a row';
+
+  const goalText =
+    level === 4 ? 'Get 20 correct in 40 seconds' :
+    level === 1 ? 'Get 5 correct in a row' :
+    level === 2 ? 'Get 10 correct in a row' :
+                  'Get 20 correct in a row';
   document.getElementById('game-goal-sub').textContent = goalText;
 
-  // Streak label changes based on mode
   if (def.streakGoal > 0) {
     document.getElementById('sc-streak-label').textContent = `Streak / ${def.streakGoal}`;
+    document.getElementById('sc-correct-label').textContent = 'Correct';
   } else {
     document.getElementById('sc-streak-label').textContent = 'Streak';
     document.getElementById('sc-correct-label').textContent = `Correct / ${def.totalGoal}`;
@@ -580,7 +553,6 @@ async function startGame(level) {
   document.getElementById('feedback').innerHTML = '&nbsp;';
   document.getElementById('feedback').className = '';
 
-  // Timer bar
   const timerWrap = document.getElementById('timer-wrap');
   if (def.timeLimit > 0) {
     timerWrap.style.display = 'block';
@@ -594,30 +566,22 @@ async function startGame(level) {
 
   showScreen('screen-game');
 
-  // Start mic
   await initAudio();
-  if (!listening) return; // mic failed — stay on screen but don't proceed
+  if (!listening) return;
 
   pickAndShowNote();
   audioLoop();
 
-  // Start countdown for level 4
-  if (def.timeLimit > 0) {
-    startTimer(def.timeLimit);
-  }
-}
+  if (def.timeLimit > 0) startTimer(def.timeLimit);
+};
 
-function retryGame() { startGame(currentLevel); }
+window.retryGame       = () => window.startGame(currentLevel);
+window.quitGame        = () => { stopAudio(); stopTimer(); window.goLevelSelect(currentMode); };
+window.playAnotherLevel = () => window.goLevelSelect(currentMode);
 
-function quitGame() {
-  stopAudio();
-  stopTimer();
-  goLevelSelect(currentMode);
-}
-
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // Audio init / teardown
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 async function initAudio() {
   stopAudio();
   document.getElementById('mic-dot').className = 'mic-dot';
@@ -635,9 +599,20 @@ async function initAudio() {
 
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioCtx.createAnalyser();
+
+  // fftSize must be large enough to resolve low piano notes.
+  // E4 = 330 Hz → at 44100 Hz SR, need at least ~134 samples per period.
+  // 4096 gives ~11ms of data at 44100 — plenty for MPM.
   analyser.fftSize = 4096;
-  analyser.smoothingTimeConstant = 0.8;
+  analyser.smoothingTimeConstant = 0.0; // MPM doesn't benefit from spectral smoothing
+
   audioCtx.createMediaStreamSource(micStream).connect(analyser);
+
+  // Build detector sized exactly to fftSize.
+  // PitchDetector.forFloat32Array(inputLength) → inputLength == fftSize
+  detector = PitchDetector.forFloat32Array(analyser.fftSize);
+  inputBuf  = new Float32Array(detector.inputLength);
+
   listening = true;
   document.getElementById('mic-dot').className = 'mic-dot active';
   document.getElementById('status-text').textContent = 'Listening — play the note shown';
@@ -648,15 +623,17 @@ function stopAudio() {
   cancelAnimationFrame(rafId);
   if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
   if (audioCtx)  { audioCtx.close(); audioCtx = null; }
+  detector = null;
+  inputBuf = null;
 }
 
-// ═══════════════════════════════════════════════════════════
-// Timer (level 4)
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// Timer
+// ═══════════════════════════════════════════════════════
 function startTimer(secs) {
   stopTimer();
   timerSecsLeft = secs;
-  const bar = document.getElementById('timer-bar');
+  const bar   = document.getElementById('timer-bar');
   const label = document.getElementById('timer-secs');
   const total = secs;
 
@@ -665,10 +642,7 @@ function startTimer(secs) {
     label.textContent = timerSecsLeft;
     bar.style.width = ((timerSecsLeft / total) * 100) + '%';
     if (timerSecsLeft <= 10) bar.classList.add('urgent');
-    if (timerSecsLeft <= 0) {
-      stopTimer();
-      endLevel(false);
-    }
+    if (timerSecsLeft <= 0)  { stopTimer(); endLevel(false); }
   }, 1000);
 }
 
@@ -676,9 +650,9 @@ function stopTimer() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // Game logic
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function pickAndShowNote() {
   let n, tries = 0;
   do {
@@ -694,8 +668,8 @@ function pickAndShowNote() {
 
 function updateScoreDisplay() {
   document.getElementById('sc-correct').textContent = correctCount;
-  document.getElementById('sc-streak').textContent = streakCount;
-  document.getElementById('sc-wrong').textContent = wrongCount;
+  document.getElementById('sc-streak').textContent  = streakCount;
+  document.getElementById('sc-wrong').textContent   = wrongCount;
 }
 
 function flash(text, cls) {
@@ -709,8 +683,8 @@ function flash(text, cls) {
 
 function checkWinCondition() {
   const def = LEVELS[currentLevel];
-  if (def.streakGoal > 0 && streakCount >= def.streakGoal) return true;
-  if (def.totalGoal > 0 && correctCount >= def.totalGoal) return true;
+  if (def.streakGoal > 0 && streakCount  >= def.streakGoal) return true;
+  if (def.totalGoal  > 0 && correctCount >= def.totalGoal)  return true;
   return false;
 }
 
@@ -720,58 +694,66 @@ function endLevel(won) {
   if (won) {
     document.getElementById('win-title').textContent = `Congratulations, you completed Level ${currentLevel}!`;
     const def = LEVELS[currentLevel];
-    let detail = '';
-    if (currentLevel === 4) detail = `20 notes correct in ${40 - timerSecsLeft} seconds with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
-    else detail = `You hit a streak of ${def.streakGoal} with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
+    const detail = currentLevel === 4
+      ? `20 notes correct in ${40 - timerSecsLeft} seconds with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`
+      : `You hit a streak of ${def.streakGoal} with ${wrongCount} mistake${wrongCount !== 1 ? 's' : ''}.`;
     document.getElementById('win-sub').textContent = detail;
     showScreen('screen-win');
   } else {
     const def = LEVELS[currentLevel];
-    let detail = '';
-    if (currentLevel === 4) detail = `You got ${correctCount} / 20 correct before time ran out.`;
-    else detail = `Your best streak was ${streakCount}. Goal: ${def.streakGoal} in a row.`;
+    const detail = currentLevel === 4
+      ? `You got ${correctCount} / 20 correct before time ran out.`
+      : `Your best streak was ${streakCount}. Goal: ${def.streakGoal} in a row.`;
     document.getElementById('lose-sub').textContent = detail;
     showScreen('screen-lose');
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// Audio loop
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// Audio loop — now using Pitchy / MPM
+// ═══════════════════════════════════════════════════════
 function audioLoop() {
   if (!listening) return;
   rafId = requestAnimationFrame(audioLoop);
 
-  const buf = new Float32Array(analyser.fftSize);
-  analyser.getFloatTimeDomainData(buf);
-  const freq = autoCorrelate(buf, audioCtx.sampleRate);
+  // Fill inputBuf from the analyser — must match detector.inputLength exactly
+  analyser.getFloatTimeDomainData(inputBuf);
+
+  // findPitch returns [pitchHz, clarity].
+  // clarity is 0–1; MPM produces 1.0 for a clean sine, ~0.9+ for clean piano.
+  const [pitch, clarity] = detector.findPitch(inputBuf, audioCtx.sampleRate);
+
   const confBar = document.getElementById('conf-bar');
 
-  if (freq < 20) {
-    document.getElementById('detected-note').textContent = '—';
+  // Below threshold → treat as silence / noise
+  if (clarity < CLARITY_THRESHOLD || pitch < 20) {
     confBar.style.width = '0%';
-    lastMidi = -1; stableCount = 0;
+    lastMidi    = -1;
+    stableCount = 0;
     return;
   }
 
-  const midi = freqToMidi(freq);
-  document.getElementById('detected-note').textContent = midiToName(midi);
+  const midi = freqToMidi(pitch);
 
-  const exactFreq = 440 * Math.pow(2, (midi - 69) / 12);
-  const cents = 1200 * Math.log2(freq / exactFreq);
-  const conf = Math.max(0, 1 - Math.abs(cents) / 60);
-  confBar.style.width = (conf * 100).toFixed(0) + '%';
+  // Map clarity (0.82–1.0 useful range) → 0–100% bar width
+  const barPct = Math.min(100, ((clarity - CLARITY_THRESHOLD) / (1 - CLARITY_THRESHOLD)) * 100);
+  confBar.style.width = barPct.toFixed(0) + '%';
 
-  if (conf < 0.2) { lastMidi = -1; stableCount = 0; return; }
-  if (midi === lastMidi) stableCount++;
-  else { lastMidi = midi; stableCount = 1; }
+  // Stability gate: require STABLE_NEEDED consecutive frames on the same MIDI note
+  if (midi === lastMidi) {
+    stableCount++;
+  } else {
+    lastMidi    = midi;
+    stableCount = 1;
+  }
 
   if (stableCount >= STABLE_NEEDED && !cooldown && currentNote) {
-    cooldown = true;
+    cooldown    = true;
     stableCount = 0;
 
     if (midi === currentNote.midi) {
-      correctCount++; streakCount++;
+      correctCount++;
+      streakCount++;
       updateScoreDisplay();
       flash('✓ Correct!', 'correct');
 
@@ -782,20 +764,18 @@ function audioLoop() {
       }
     } else {
       wrongCount++;
-      const def = LEVELS[currentLevel];
-      // For streak-based levels, a wrong answer resets streak
-      if (def.streakGoal > 0) streakCount = 0;
+      if (LEVELS[currentLevel].streakGoal > 0) streakCount = 0;
       updateScoreDisplay();
-      const got = midiToName(midi);
-      flash(`✗ That was ${got}`, 'wrong');
+      flash(`✗ That was ${midiToName(midi)}`, 'wrong');
       setTimeout(() => { cooldown = false; }, 1100);
     }
   }
 }
-  // Re-render on window resize so notation stays within bounds
-  window.addEventListener('resize', () => {
-    if (currentNote) renderNote(currentNote);
-  });
+
+// Re-render on resize
+window.addEventListener('resize', () => {
+  if (currentNote) renderNote(currentNote);
+});
 </script>
 </body>
 </html>
