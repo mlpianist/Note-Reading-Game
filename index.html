@@ -192,10 +192,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 130px;
+    min-height: 80px;
     position: relative;
     transition: background 0.25s;
     width: 100%;
+    overflow: hidden;
   }
   #staff-wrap.correct { background: #effff2; }
   #staff-wrap.wrong   { background: #fff2f2; }
@@ -439,11 +440,19 @@ const VF = (typeof Vex !== "undefined" && Vex.Flow)
 function renderNote(noteObj) {
   const container = document.getElementById('staff-svg');
   container.innerHTML = '';
-  const W = 400, H = 115;
+  // Measure the available width of the staff wrapper, capped at 400px
+  const wrap = document.getElementById('staff-wrap');
+  const W = Math.min(400, wrap.clientWidth - 16);
+  const H = Math.round(W * 115 / 400);
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
   renderer.resize(W, H);
   const ctx = renderer.getContext();
-  const stave = new VF.Stave(10, 10, W - 20);
+  // Scale the stave and note positions proportionally
+  const scale = W / 400;
+  const staveX = Math.round(10 * scale);
+  const staveY = Math.round(10 * scale);
+  const staveW = W - staveX * 2;
+  const stave = new VF.Stave(staveX, staveY, staveW);
   stave.addClef('treble');
   stave.setContext(ctx).draw();
   const sn = new VF.StaveNote({ clef:'treble', keys:[noteObj.vex], duration:'q' });
@@ -452,9 +461,8 @@ function renderNote(noteObj) {
   const voice = new VF.Voice({ num_beats:1, beat_value:4 });
   voice.setStrict(false);
   voice.addTickables([sn]);
-  new VF.Formatter().joinVoices([voice]).format([voice], W - 100);
+  new VF.Formatter().joinVoices([voice]).format([voice], staveW - Math.round(80 * scale));
   voice.draw(ctx, stave);
-
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -783,6 +791,10 @@ function audioLoop() {
     }
   }
 }
+  // Re-render on window resize so notation stays within bounds
+  window.addEventListener('resize', () => {
+    if (currentNote) renderNote(currentNote);
+  });
 </script>
 </body>
 </html>
