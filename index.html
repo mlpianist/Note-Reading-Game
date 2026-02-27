@@ -5,12 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treble Clef Note Reading Game</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
-<script type="module">
-// Import Pitchy (McLeod Pitch Method — much more accurate than autocorrelation for piano)
-import { PitchDetector } from "https://cdn.jsdelivr.net/npm/pitchy@4/dist/pitchy.js";
-window._PitchDetector = PitchDetector;
-window._pitchyReady = true;
-</script>
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -484,67 +479,88 @@ function renderNote(noteObj) {
 // ═══════════════════════════════════════════════════════════
 // Pitch detection
 // ═══════════════════════════════════════════════════════════
-// Pitchy pitch detector instance (created once audio is set up)
-let _pitchDetector = null;
-let _pitchInput = null;
+// ── Inline McLeod Pitch Method (MPM) ─────────────────────────────────────────
+// Based on McLeod & Wyvill (2005). No external dependency.
+// Much more accurate than autocorrelation for piano/harmonic-rich instruments.
 
-function initPitchDetector(bufferSize) {
-  if (window._PitchDetector) {
-    _pitchDetector = window._PitchDetector.forFloat32Array(bufferSize);
-    _pitchInput = new Float32Array(_pitchDetector.inputLength);
-    console.log("Using Pitchy (McLeod Pitch Method)");
-  } else {
-    console.log("Pitchy not ready yet, will use fallback autocorrelation");
-  }
-}
-
-// Fallback autocorrelation (used only if Pitchy hasn't loaded)
-function autoCorrelate(buffer, sampleRate) {
-  const SIZE = buffer.length;
-  let rms = 0;
-  for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.003) return -1;
-  let r1 = 0, r2 = SIZE - 1;
-  for (let i = 0; i < SIZE/2; i++) { if (Math.abs(buffer[i]) < 0.2) { r1 = i; break; } }
-  for (let i = 1; i < SIZE/2; i++) { if (Math.abs(buffer[SIZE-i]) < 0.2) { r2 = SIZE-i; break; } }
-  const buf2 = buffer.slice(r1, r2);
-  const c = new Float32Array(buf2.length).fill(0);
-  for (let i = 0; i < buf2.length; i++)
-    for (let j = 0; j < buf2.length - i; j++)
-      c[i] += buf2[j] * buf2[j+i];
-  let d = 0;
-  while (d < c.length && c[d] > c[d+1]) d++;
-  let maxVal = -1, maxPos = -1;
-  for (let i = d; i < c.length; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
-  if (maxPos < 1) return -1;
-  let T0 = maxPos;
-  const x1 = c[T0-1] ?? c[T0], x2 = c[T0], x3 = c[T0+1] ?? c[T0];
-  const a = (x1 + x3 - 2*x2) / 2, b = (x3 - x1) / 2;
-  if (a) T0 -= b / (2*a);
-  return sampleRate / T0;
-}
-
-// Main pitch detection — uses Pitchy if available, else autocorrelation
 function detectPitch(buffer, sampleRate) {
-  // RMS check first
+  const N = buffer.length;
+
+  // RMS silence check
   let rms = 0;
-  for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / buffer.length);
+  for (let i = 0; i < N; i++) rms += buffer[i] * buffer[i];
+  rms = Math.sqrt(rms / N);
   if (rms < 0.003) return { freq: -1, clarity: 0 };
 
-  if (_pitchDetector) {
-    // Copy tail of buffer into pitchy input (pitchy needs a specific size)
-    const offset = buffer.length - _pitchInput.length;
-    for (let i = 0; i < _pitchInput.length; i++)
-      _pitchInput[i] = buffer[offset + i];
-    const [freq, clarity] = _pitchDetector.findPitch(_pitchInput, sampleRate);
-    return { freq: freq > 0 ? freq : -1, clarity };
-  } else {
-    const freq = autoCorrelate(buffer, sampleRate);
-    return { freq, clarity: freq > 0 ? 0.9 : 0 };
+  // Step 1: Normalised Square Difference Function (NSDF)
+  // nsdf[tau] = 2 * acf[tau] / (r[0] + r[tau])  where r[tau] = sum(x^2 shifts)
+  const nsdf = new Float32Array(N);
+  let rTau = 0, r0 = 0;
+  for (let i = 0; i < N; i++) r0 += buffer[i] * buffer[i];
+  rTau = r0;
+  // acf via direct computation for the lags we need (up to N/2)
+  // Use a running update for efficiency
+  const acf = new Float32Array(N);
+  for (let tau = 0; tau < N / 2; tau++) {
+    let sum = 0;
+    for (let i = 0; i < N - tau; i++) sum += buffer[i] * buffer[i + tau];
+    acf[tau] = sum;
   }
+  // m'(tau) = sum(x[i]^2) + sum(x[i+tau]^2) for i=0..N-tau-1
+  for (let tau = 0; tau < N / 2; tau++) {
+    let mTau = 0;
+    for (let i = 0; i < N - tau; i++) mTau += buffer[i] * buffer[i] + buffer[i + tau] * buffer[i + tau];
+    nsdf[tau] = mTau > 0 ? (2 * acf[tau]) / mTau : 0;
+  }
+
+  // Step 2: Find all positive-to-negative zero crossings after the first,
+  // pick the highest peak between each pair as a "key maximum"
+  const keyMaxima = [];
+  let posStart = -1;
+  let peakVal = -Infinity, peakPos = -1;
+
+  for (let tau = 1; tau < N / 2; tau++) {
+    if (nsdf[tau - 1] <= 0 && nsdf[tau] > 0) {
+      posStart = tau;
+      peakVal = -Infinity;
+      peakPos = -1;
+    }
+    if (posStart >= 0 && nsdf[tau] > peakVal) {
+      peakVal = nsdf[tau];
+      peakPos = tau;
+    }
+    if (posStart >= 0 && nsdf[tau - 1] >= 0 && nsdf[tau] < 0 && peakPos > 0) {
+      keyMaxima.push({ pos: peakPos, val: peakVal });
+      posStart = -1;
+    }
+  }
+
+  if (keyMaxima.length === 0) return { freq: -1, clarity: 0 };
+
+  // Step 3: Pick the first key maximum above the threshold k*globalMax
+  const globalMax = Math.max(...keyMaxima.map(m => m.val));
+  const k = 0.8; // MPM threshold — lower = more sensitive, higher = more selective
+  let chosen = null;
+  for (const m of keyMaxima) {
+    if (m.val >= k * globalMax) { chosen = m; break; }
+  }
+  if (!chosen) chosen = keyMaxima[0];
+
+  // Step 4: Parabolic interpolation for sub-sample accuracy
+  const tau = chosen.pos;
+  const y1 = nsdf[tau - 1] ?? nsdf[tau];
+  const y2 = nsdf[tau];
+  const y3 = nsdf[tau + 1] ?? nsdf[tau];
+  const denom = 2 * (2 * y2 - y1 - y3);
+  const refinedTau = denom !== 0 ? tau + (y3 - y1) / denom : tau;
+
+  const freq = sampleRate / refinedTau;
+  const clarity = Math.max(0, Math.min(1, chosen.val));
+
+  return { freq, clarity };
 }
+
+function initPitchDetector() { /* no-op: MPM is inline, nothing to init */ }
 function freqToMidi(freq) { return Math.round(12 * Math.log2(freq / 440) + 69); }
 function midiToName(midi) {
   const names = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
@@ -687,7 +703,7 @@ async function initAudio() {
   analyser.fftSize = 4096;
   analyser.smoothingTimeConstant = 0.5;
   audioCtx.createMediaStreamSource(micStream).connect(analyser);
-  initPitchDetector(analyser.fftSize);
+  initPitchDetector();
   listening = true;
   document.getElementById('mic-dot').className = 'mic-dot active';
   document.getElementById('status-text').textContent = 'Listening — play the note shown';
@@ -793,9 +809,7 @@ function audioLoop() {
   rafId = requestAnimationFrame(audioLoop);
 
   // Retry Pitchy init if it wasn't ready when audio started
-  if (!_pitchDetector && window._PitchDetector) {
-    initPitchDetector(analyser.fftSize);
-  }
+
 
   const buf = new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
