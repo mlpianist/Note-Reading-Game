@@ -538,7 +538,8 @@ function detectPitch(buffer, sampleRate) {
   if (keyMaxima.length === 0) return { freq: -1, clarity: 0 };
 
   // Step 3: Pick the first key maximum above the threshold k*globalMax
-  const globalMax = Math.max(...keyMaxima.map(m => m.val));
+  let globalMax = -Infinity;
+  for (let i = 0; i < keyMaxima.length; i++) { if (keyMaxima[i].val > globalMax) globalMax = keyMaxima[i].val; }
   const k = 0.8; // MPM threshold — lower = more sensitive, higher = more selective
   let chosen = null;
   for (const m of keyMaxima) {
@@ -548,9 +549,9 @@ function detectPitch(buffer, sampleRate) {
 
   // Step 4: Parabolic interpolation for sub-sample accuracy
   const tau = chosen.pos;
-  const y1 = nsdf[tau - 1] ?? nsdf[tau];
+  const y1 = (tau - 1 >= 0) ? nsdf[tau - 1] : nsdf[tau];
   const y2 = nsdf[tau];
-  const y3 = nsdf[tau + 1] ?? nsdf[tau];
+  const y3 = (tau + 1 < nsdf.length) ? nsdf[tau + 1] : nsdf[tau];
   const denom = 2 * (2 * y2 - y1 - y3);
   const refinedTau = denom !== 0 ? tau + (y3 - y1) / denom : tau;
 
@@ -862,10 +863,10 @@ function audioLoop() {
     }
   }
 }
-  // Re-render on window resize so notation stays within bounds
-  window.addEventListener('resize', () => {
-    if (currentNote) renderNote(currentNote);
-  });
+// Re-render on window resize so notation stays within bounds
+window.addEventListener('resize', function() {
+  if (currentNote) renderNote(currentNote);
+});
 </script>
 </body>
 </html>
