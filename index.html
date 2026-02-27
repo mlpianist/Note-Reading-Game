@@ -187,16 +187,15 @@
   #staff-wrap {
     background: #f9f9f4;
     border-radius: 12px;
-    padding: 12px 0 8px;
+    padding: 16px 8px;
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 140px;
     position: relative;
     transition: background 0.25s;
     width: 100%;
-    overflow: hidden;
+    box-sizing: border-box;
   }
   #staff-wrap.correct { background: #effff2; }
   #staff-wrap.wrong   { background: #fff2f2; }
@@ -440,30 +439,40 @@ const VF = (typeof Vex !== "undefined" && Vex.Flow)
 function renderNote(noteObj) {
   const container = document.getElementById('staff-svg');
   container.innerHTML = '';
-  // Measure the available width of the staff wrapper, capped at 400px
-  const wrap = document.getElementById('staff-wrap');
-  const W = Math.min(400, wrap.clientWidth - 16);
-  // Use a fixed height that always fits the stave regardless of width
-  const H = 140;
+
+  // Always render VexFlow at a fixed large internal canvas (avoids any layout-dependent clipping)
+  const RENDER_W = 400;
+  const RENDER_H = 160;
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-  renderer.resize(W, H);
+  renderer.resize(RENDER_W, RENDER_H);
   const ctx = renderer.getContext();
-  const scale = W / 400;
-  const staveX = Math.round(10 * scale);
-  // Fixed staveY so there's always room for ledger lines below
-  const staveY = 20;
-  const staveW = W - staveX * 2;
-  const stave = new VF.Stave(staveX, staveY, staveW);
+
+  const stave = new VF.Stave(10, 20, RENDER_W - 20);
   stave.addClef('treble');
   stave.setContext(ctx).draw();
+
   const sn = new VF.StaveNote({ clef:'treble', keys:[noteObj.vex], duration:'q' });
   if (noteObj.acc === '#') sn.addAccidental(0, new VF.Accidental('#'));
   else if (noteObj.acc === 'b') sn.addAccidental(0, new VF.Accidental('b'));
   const voice = new VF.Voice({ num_beats:1, beat_value:4 });
   voice.setStrict(false);
   voice.addTickables([sn]);
-  new VF.Formatter().joinVoices([voice]).format([voice], staveW - Math.round(80 * scale));
+  new VF.Formatter().joinVoices([voice]).format([voice], RENDER_W - 100);
   voice.draw(ctx, stave);
+
+  // Scale the SVG to fit the wrapper width using viewBox + width:100%
+  // height:auto lets the browser calculate the correct height from the aspect ratio,
+  // so nothing is ever clipped regardless of screen width.
+  const svgEl = container.querySelector('svg');
+  if (svgEl) {
+    svgEl.setAttribute('viewBox', '0 0 ' + RENDER_W + ' ' + RENDER_H);
+    svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svgEl.removeAttribute('width');
+    svgEl.removeAttribute('height');
+    svgEl.style.width = '100%';
+    svgEl.style.height = 'auto';
+    svgEl.style.display = 'block';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
