@@ -192,7 +192,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 80px;
+    min-height: 140px;
     position: relative;
     transition: background 0.25s;
     width: 100%;
@@ -443,14 +443,15 @@ function renderNote(noteObj) {
   // Measure the available width of the staff wrapper, capped at 400px
   const wrap = document.getElementById('staff-wrap');
   const W = Math.min(400, wrap.clientWidth - 16);
-  const H = Math.round(W * 115 / 400);
+  // Use a fixed height that always fits the stave regardless of width
+  const H = 140;
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
   renderer.resize(W, H);
   const ctx = renderer.getContext();
-  // Scale the stave and note positions proportionally
   const scale = W / 400;
   const staveX = Math.round(10 * scale);
-  const staveY = Math.round(10 * scale);
+  // Fixed staveY so there's always room for ledger lines below
+  const staveY = 20;
   const staveW = W - staveX * 2;
   const stave = new VF.Stave(staveX, staveY, staveW);
   stave.addClef('treble');
