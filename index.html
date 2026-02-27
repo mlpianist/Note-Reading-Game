@@ -465,7 +465,7 @@ function autoCorrelate(buffer, sampleRate) {
   let rms = 0;
   for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
   rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.008) return -1;
+  if (rms < 0.003) return -1;
   let r1 = 0, r2 = SIZE - 1;
   const thresh = 0.2;
   for (let i = 0; i < SIZE/2; i++) { if (Math.abs(buffer[i]) < thresh) { r1 = i; break; } }
@@ -510,7 +510,7 @@ let streakCount = 0;
 let listening = false;
 let audioCtx = null, analyser = null, micStream = null, rafId = null;
 let cooldown = false, lastMidi = -1, stableCount = 0;
-const STABLE_NEEDED = 10;
+const STABLE_NEEDED = 5;
 
 // Timer (level 4)
 let timerInterval = null;
@@ -627,7 +627,7 @@ async function initAudio() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 4096;
-  analyser.smoothingTimeConstant = 0.6;
+  analyser.smoothingTimeConstant = 0.8;
   audioCtx.createMediaStreamSource(micStream).connect(analyser);
   listening = true;
   document.getElementById('mic-dot').className = 'mic-dot active';
@@ -753,7 +753,7 @@ function audioLoop() {
   const conf = Math.max(0, 1 - Math.abs(cents) / 60);
   confBar.style.width = (conf * 100).toFixed(0) + '%';
 
-  if (conf < 0.35) { lastMidi = -1; stableCount = 0; return; }
+  if (conf < 0.2) { lastMidi = -1; stableCount = 0; return; }
   if (midi === lastMidi) stableCount++;
   else { lastMidi = midi; stableCount = 1; }
 
