@@ -296,6 +296,12 @@
       <button class="btn btn-primary mode-btn" onclick="goLevelSelect('lines')">
         <span class="btn-title">Treble Clef Lines</span>
       </button>
+      <button class="btn btn-primary mode-btn" onclick="goLevelSelect('bass-spaces')">
+        <span class="btn-title">Bass Clef Spaces</span>
+      </button>
+      <button class="btn btn-primary mode-btn" onclick="goLevelSelect('bass-lines')">
+        <span class="btn-title">Bass Clef Lines</span>
+      </button>
     </div>
   </div>
 </div>
@@ -412,6 +418,19 @@ const LINES_NOTES = [
   { vex:'d/5', name:'D5', midi:74, acc:null },
   { vex:'f/5', name:'F5', midi:77, acc:null },
 ];
+const BASS_SPACES_NOTES = [
+  { vex:'a/2', name:'A2', midi:45, acc:null },
+  { vex:'c/3', name:'C3', midi:48, acc:null },
+  { vex:'e/3', name:'E3', midi:52, acc:null },
+  { vex:'g/3', name:'G3', midi:55, acc:null },
+];
+const BASS_LINES_NOTES = [
+  { vex:'g/2', name:'G2', midi:43, acc:null },
+  { vex:'b/2', name:'B2', midi:47, acc:null },
+  { vex:'d/3', name:'D3', midi:50, acc:null },
+  { vex:'f/3', name:'F3', midi:53, acc:null },
+  { vex:'a/3', name:'A3', midi:57, acc:null },
+];
 
 const LEVELS = [
   null,
@@ -442,9 +461,10 @@ function renderNote(noteObj) {
   const staveY = 20;
   const staveW = W - staveX * 2;
   const stave = new VF.Stave(staveX, staveY, staveW);
-  stave.addClef('treble');
+  const clef = (currentMode === 'bass-spaces' || currentMode === 'bass-lines') ? 'bass' : 'treble';
+  stave.addClef(clef);
   stave.setContext(ctx).draw();
-  const sn = new VF.StaveNote({ clef:'treble', keys:[noteObj.vex], duration:'q' });
+  const sn = new VF.StaveNote({ clef, keys:[noteObj.vex], duration:'q' });
   if (noteObj.acc === '#') sn.addAccidental(0, new VF.Accidental('#'));
   else if (noteObj.acc === 'b') sn.addAccidental(0, new VF.Accidental('b'));
   const voice = new VF.Voice({ num_beats:1, beat_value:4 });
@@ -518,15 +538,21 @@ window.goLevelSelect = function(mode) {
   stopAudio();
   stopTimer();
   currentMode = mode;
-  const isSpaces = mode === 'spaces';
+  const labels = {
+    'spaces':      ['Treble Clef', 'Spaces'],
+    'lines':       ['Treble Clef', 'Lines'],
+    'bass-spaces': ['Bass Clef',   'Spaces'],
+    'bass-lines':  ['Bass Clef',   'Lines'],
+  };
+  const [prefix, suffix] = labels[mode];
   document.getElementById('level-screen-title').innerHTML =
-    'Treble Clef <span style="color:var(--accent)">' + (isSpaces ? 'Spaces' : 'Lines') + '</span>';
+    `${prefix} <span style="color:var(--accent)">${suffix}</span>`;
   showScreen('screen-levels');
 };
 
 window.startGame = async function(level) {
   currentLevel = level;
-  notePool = currentMode === 'spaces' ? SPACES_NOTES : LINES_NOTES;
+  notePool = { spaces: SPACES_NOTES, lines: LINES_NOTES, 'bass-spaces': BASS_SPACES_NOTES, 'bass-lines': BASS_LINES_NOTES }[currentMode];
   correctCount = 0; wrongCount = 0; streakCount = 0;
   currentNote  = null;
   cooldown     = false; lastMidi = -1; stableCount = 0;
